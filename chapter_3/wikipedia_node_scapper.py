@@ -9,18 +9,17 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from queue import Queue 
 import networkx as nx
+import pickle
 import datetime
 import random
 import re
-
-
-
+import os.path
 
 # Basic besite url for wikipedia
 wikipedia_base_url = 'https://en.wikipedia.org' 
 
 # target wiki page
-target_page = '/wiki/Insect'
+target_page = '/wiki/Hippie'
 
 # starting wiki page 
 current_page = start_page = '/wiki/Transport'
@@ -37,36 +36,68 @@ WG = nx.Graph()
 
 
 
-
-
 def get_links( url ):
     ''' Get all the unvisited links form the given url '''
     links = []
-    # get html page
-    page_html = urlopen(url)
-    # make soup....hmmm yummi =) lxml to make it fast 
-    soup = BeautifulSoup( page_html, 'lxml' )
-    # for a tag found to have a tribute href which starts with 'wiki'
-    return soup('a', href=re.compile('^(\/wiki\/(?!File|Portal:|Wikipedia:|Special:|Help:|Talk:))'))
-        
+    try:
+        # get html page
+        page_html = urlopen(url)
+        # make soup....hmmm yummi =) lxml to make it fast 
+        soup = BeautifulSoup( page_html, 'lxml' )
+        # for a tag found to have a tribute href which starts with 'wiki'
+        return soup('a', href=re.compile('^(\/wiki\/(?!File|Portal:|Wikipedia:|Special:|Help:|Talk:))'))
+    except URLError as e:
+        print("URLError")
+        print( url)
+        return e
 
-        
-while current_page is not target_page:
+def panic_save_everything():
     
-    # Add current node ot the graph
-    WG.add_node(current_page)
 
-    for page in get_links( wikipedia_base_url + current_page ):
-        # if page is has not bee visited appedn then to the queue
-        if page is target_page: 
-            print("PAGE FOUND")
-            break
-        if page not in visited_pages:
-            WG.add_node( page['href'] )
-            WG.add_edge( current_page,  page['href'] )
-            queued_pages.put( page['href'] )
-    visited_pages[current_page] = True
-    current_page = queued_pages.get()
+
+
+
+
+def start_crawler():
+    ''' Starts the crawler '''
+    # check if there is error file
+    # check if there are files
+    if os.path.isfile("exited_on_error"):
+        print("reading from file left behind in previus seccion...")
+
+        # delete errror file 
+    else:
+        print("Starting crawler...")
+
+
+    #f = open("exited_on_error","w+") 
+        
+    while current_page is not target_page:
+    
+        # Add current node to the graph
+        WG.add_node(current_page)
+        # try to get the links for the current url
+    try:
+        pages = get_links( wikipedia_base_url + current_page ):
+    except:
+        #if it failed, saved everything we got so far! 
+        # make a file indicating that the previous try has encounted an error
+
+
+        
+    else:
+
+        for page in pages: 
+         # if page is has not bee visited appedn then to the queue
+            if page is target_page: 
+                print("PAGE FOUND")
+                break
+            if page not in visited_pages:
+                WG.add_node( page['href'] )
+                WG.add_edge( current_page,  page['href'] )
+                queued_pages.put( page['href'] )
+        visited_pages[current_page] = True
+        current_page = queued_pages.get()
     nx.write_gpickle(WG, "data_graph.nx")
 
     print()
@@ -75,5 +106,7 @@ while current_page is not target_page:
     print(  "current page: "      +  current_page                 )
     print(  "number of nodes: "   +  str( WG.number_of_nodes())   )
     print(  "number of edges: "   +  str( WG.number_of_edges())   )
-       
+'''
 
+
+start_crawler()
