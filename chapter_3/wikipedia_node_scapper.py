@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from urllib.request import urlopen 
 from bs4 import BeautifulSoup
 from queue import Queue 
