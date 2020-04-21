@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+#   a program to scrap an store the whole wikipedia vertex and edges,
+#   so that an ofline program can find the shortes path on this data
+#   istahd of having to do online html requests, which take time
+#   by Goran Topic
+
 from urllib.request import urlopen 
 from bs4 import BeautifulSoup
 from queue import Queue 
@@ -10,10 +15,6 @@ import re
 
 
 
-#   a program to scrap an store the whole wikipedia vertex and edges,
-#   so that an ofline program can find the shortes path on this data
-#   istahd of having to do online html requests, which take time
-#   by Goran Topic
 
 # Basic besite url for wikipedia
 wikipedia_base_url = 'https://en.wikipedia.org' 
@@ -24,8 +25,9 @@ target_page = '/wiki/Insect'
 # starting wiki page 
 current_page = start_page = '/wiki/Transport'
 
-# set of visited pages
-visited_pages = set()
+# a dictionary  of visited pages, has to be a dict
+# so that time complexity is kept at o(1)
+visited_pages = {}
 
 # queue of pages to visit 
 queued_pages = Queue()
@@ -63,7 +65,7 @@ while current_page is not target_page:
             WG.add_node( page['href'] )
             WG.add_edge( current_page,  page['href'] )
             queued_pages.put( page['href'] )
-    visited_pages.add(current_page)
+    visited_pages[current_page] = True
     current_page = queued_pages.get()
     nx.write_gpickle(WG, "data_graph.nx")
 
