@@ -32,7 +32,7 @@ def get_links( url ):
     # make soup....hmmm yummi =) lxml to make it fast 
     soup = BeautifulSoup( page_html, 'lxml' )
     # for a tag found to have a tribute href which starts with 'wiki'
-    for link in soup('a', href=re.compile('^(/wiki/)((?!File)|(?!Special)|(?!About)|(?!Wikipedia))')  ):
+    for link in soup('a', href=re.compile('^(\/wiki\/(?!File|Portal:|Wikipedia:|Special:|Help:))')):
         #if 'href' in link.attrs:
         print( link['href'])
            #check is we have already visited the page
